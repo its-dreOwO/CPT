@@ -2,9 +2,8 @@
 .env
 
 # Data (large files, regenerable)
-data/raw/
-data/processed/
-data/cache/
+data/
+!data/.gitkeep
 
 # Saved model weights
 models/*.pt
