@@ -47,7 +47,7 @@ def with_retry(
                         if attempt.retry_state.attempt_number > 1:
                             logger.warning(
                                 f"Retrying {func.__name__} (attempt {attempt.retry_state.attempt_number}/{max_attempts}) "
-                                f"after error: {attempt.retry_state.outcome.exception()}"
+                                f"after error: {attempt.retry_state.outcome.exception() if attempt.retry_state.outcome else 'unknown'}"
                             )
                         return await func(*args, **kwargs)
 
@@ -66,7 +66,7 @@ def with_retry(
                         if attempt.retry_state.attempt_number > 1:
                             logger.warning(
                                 f"Retrying {func.__name__} (attempt {attempt.retry_state.attempt_number}/{max_attempts}) "
-                                f"after error: {attempt.retry_state.outcome.exception()}"
+                                f"after error: {attempt.retry_state.outcome.exception() if attempt.retry_state.outcome else 'unknown'}"
                             )
                         return func(*args, **kwargs)
 

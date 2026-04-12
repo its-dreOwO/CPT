@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-from typing import Union
+from typing import Optional, Union
 
 
 def now_utc() -> datetime.datetime:
@@ -26,7 +26,7 @@ def to_utc(dt: Union[str, datetime.datetime, pd.Timestamp]) -> datetime.datetime
     return dt.astimezone(datetime.timezone.utc)
 
 
-def resample_hourly(df: pd.DataFrame, datetime_col: str = None) -> pd.DataFrame:
+def resample_hourly(df: pd.DataFrame, datetime_col: Optional[str] = None) -> pd.DataFrame:
     """
     Resamples a dataframe to 1h UTC DatetimeIndex.
     Assumes the index is a datetime index if datetime_col is Not provided.

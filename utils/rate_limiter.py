@@ -12,8 +12,8 @@ class RateLimiter:
 
     def __init__(self, limits_per_min: Dict[str, int]):
         self.limits = limits_per_min
-        # Maps service name to tuple of (tokens, last_update_time)
         self._tokens: Dict[str, float] = {}
+        self._last_update: Dict[str, float] = {}
         for service, limit in limits_per_min.items():
             self._tokens[service] = float(limit)
 
@@ -26,9 +26,6 @@ class RateLimiter:
 
         rate_per_sec = self.limits[service] / 60.0
         current_time = time.time()
-
-        if not hasattr(self, "_last_update"):
-            self._last_update = {}
 
         if service not in self._last_update:
             self._last_update[service] = current_time
