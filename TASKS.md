@@ -1,5 +1,5 @@
 # CPT — Task Tracker
-# Last Updated: 2026-04-11
+# Last Updated: 2026-04-12
 
 ---
 
@@ -33,15 +33,15 @@
 
 ## PHASE B — Data Collection
 
-- [ ] **B1** Implement `engines/macro/fred_client.py` — fetch FEDFUNDS, DGS10, M2SL
-- [ ] **B2** Implement `engines/macro/m2_supply.py` — M2 trend analysis wrapper
-- [ ] **B3** Implement `engines/macro/dxy_tracker.py` — fetch DXY from yfinance
-- [ ] **B4** Implement `engines/macro/macro_aggregator.py` — merge on UTC hourly index
-- [ ] **B5** Implement `engines/macro/macro_features.py` — YoY change, z-scores, lags
-- [ ] **B6** Implement `scripts/backfill_prices.py` — 3 years of SOL/DOGE OHLCV from Binance
-- [ ] **B7** Run `make backfill` — populate historical price data (needed before training)
-- [ ] **B8** Implement `engines/prices/price_stream.py` — ccxt WebSocket for live SOL/DOGE ticks
-- [ ] **B9** Implement `engines/prices/price_aggregator.py` — ticks → 1min/1hr OHLCV candles
+- [x] **B1** Implement `engines/macro/fred_client.py` — fetch FEDFUNDS, DGS10, M2SL
+- [x] **B2** Implement `engines/macro/m2_supply.py` — M2 MoM/YoY trend + expansion signal
+- [x] **B3** Implement `engines/macro/dxy_tracker.py` — fetch DXY from yfinance
+- [x] **B4** Implement `engines/macro/macro_aggregator.py` — merge on UTC hourly index with ffill
+- [x] **B5** Implement `engines/macro/macro_features.py` — z-scores, 7d/30d lags, macro_sentiment [-1,+1]
+- [x] **B6** Implement `scripts/backfill_prices.py` — yfinance hourly OHLCV (Binance REST geo-blocked; yfinance confirmed working)
+- [x] **B7** Run backfill — SOL: 17,468 candles | DOGE: 17,467 candles | Total: 34,935 in DB
+- [x] **B8** Implement `engines/prices/price_stream.py` — ccxt.pro WebSocket, fires on_trigger on ≥1% move
+- [x] **B9** Implement `engines/prices/price_aggregator.py` — in-memory tick buffer → 1min/1h OHLCV on demand
 
 ---
 
