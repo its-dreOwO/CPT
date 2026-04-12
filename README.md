@@ -176,7 +176,7 @@ make format
 | Phase | Status |
 |-------|--------|
 | A — Foundation (config, utils, storage) | Complete |
-| B — Data Collection (macro, prices) | In progress |
+| B — Data Collection (macro, prices) | Complete |
 | C — Sentiment Engine | Pending |
 | D — On-Chain Engine | Pending |
 | E — ML Models | Pending |
