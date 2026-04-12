@@ -71,8 +71,8 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 
     if sentiment_parts:
         raw = pd.concat(sentiment_parts, axis=1).mean(axis=1)
-        # Clip to [-1, +1] using tanh-like scaling
-        out["macro_sentiment"] = raw.clip(-3, 3) / 3
+        # Clip to [-1, +1] using tanh-like scaling; fill early NaNs (pre-window) with 0
+        out["macro_sentiment"] = (raw.clip(-3, 3) / 3).fillna(0.0)
     else:
         out["macro_sentiment"] = 0.0
 
