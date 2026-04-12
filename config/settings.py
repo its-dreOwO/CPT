@@ -41,7 +41,9 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------
     # ENGINE 1 — Macroeconomic
     # ------------------------------------------------------------
-    FRED_API_KEY: str = Field(default="", description="FRED API key from https://fred.stlouisfed.org")
+    FRED_API_KEY: str = Field(
+        default="", description="FRED API key from https://fred.stlouisfed.org"
+    )
 
     # ------------------------------------------------------------
     # ENGINE 2 — On-Chain Analytics
@@ -63,7 +65,9 @@ class Settings(BaseSettings):
         description="Solana RPC endpoint (Alchemy or Helius recommended)",
     )
 
-    DOGE_RPC_URL: str = Field(default="http://localhost:22555", description="Dogecoin Core JSON-RPC URL")
+    DOGE_RPC_URL: str = Field(
+        default="http://localhost:22555", description="Dogecoin Core JSON-RPC URL"
+    )
     DOGE_RPC_USER: str = Field(default="", description="Dogecoin RPC username")
     DOGE_RPC_PASS: str = Field(default="", description="Dogecoin RPC password")
 
@@ -94,14 +98,18 @@ class Settings(BaseSettings):
         default="whatsapp:+14155238886",
         description="Twilio WhatsApp sender (sandbox by default)",
     )
-    TWILIO_WHATSAPP_TO: str = Field(default="", description="Your WhatsApp number (with country code)")
+    TWILIO_WHATSAPP_TO: str = Field(
+        default="", description="Your WhatsApp number (with country code)"
+    )
 
     # ------------------------------------------------------------
     # NOTIFICATIONS — Zalo Official Account
     # ------------------------------------------------------------
     ZALO_APP_ID: str = Field(default="", description="Zalo app ID from developers.zalo.me")
     ZALO_APP_SECRET: str = Field(default="", description="Zalo app secret")
-    ZALO_OA_ACCESS_TOKEN: str = Field(default="", description="Zalo OA access token (expires every 1h)")
+    ZALO_OA_ACCESS_TOKEN: str = Field(
+        default="", description="Zalo OA access token (expires every 1h)"
+    )
     ZALO_REFRESH_TOKEN: str = Field(default="", description="Zalo refresh token for auto-renewal")
 
     # ------------------------------------------------------------
@@ -123,7 +131,7 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------
     SERVER_HOST: str = "0.0.0.0"
     SERVER_PORT: int = 8000
-    SERVER_RELOAD: bool = False   # Set True only in development
+    SERVER_RELOAD: bool = False  # Set True only in development
 
 
 # Singleton instance — import this everywhere in the codebase.

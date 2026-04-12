@@ -21,7 +21,9 @@
       "Bash(.venv/Scripts/python.exe -m pip install \"git+https://github.com/google-research/timesfm\")",
       "Bash(tasklist /FI \"IMAGENAME eq python.exe\")",
       "Bash(tasklist /FI \"IMAGENAME eq python3.exe\")",
-      "Bash(tasklist)"
+      "Bash(tasklist)",
+      "Bash(python -m ruff check .)",
+      "Bash(python -m black --check --line-length 100 .)"
     ]
   }
 }

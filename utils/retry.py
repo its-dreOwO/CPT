@@ -20,20 +20,21 @@ RETRY_EXCEPTIONS = (
     httpx.HTTPError,
     requests.exceptions.RequestException,
     ConnectionError,
-    TimeoutError
+    TimeoutError,
 )
 
+
 def with_retry(
-    max_attempts: int = 3,
-    min_wait_sec: float = 2.0,
-    max_wait_sec: float = 10.0
+    max_attempts: int = 3, min_wait_sec: float = 2.0, max_wait_sec: float = 10.0
 ) -> Callable:
     """
     A decorator to retry a function if it raises common HTTP or network errors.
     Supports both synchronous and asynchronous functions.
     """
+
     def decorator(func: Callable) -> Callable:
         if asyncio.iscoroutinefunction(func):
+
             @wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 async for attempt in AsyncRetrying(
@@ -49,8 +50,10 @@ def with_retry(
                                 f"after error: {attempt.retry_state.outcome.exception()}"
                             )
                         return await func(*args, **kwargs)
+
             return async_wrapper
         else:
+
             @wraps(func)
             def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
                 for attempt in Retrying(
@@ -66,6 +69,7 @@ def with_retry(
                                 f"after error: {attempt.retry_state.outcome.exception()}"
                             )
                         return func(*args, **kwargs)
+
             return sync_wrapper
 
     return decorator

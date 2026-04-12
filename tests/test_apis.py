@@ -4,7 +4,6 @@ Run from project root: python -m tests.test_apis
 """
 
 import requests
-import json
 
 
 # ============================================================

@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
 
+
 def pct_change(old_val: float, new_val: float) -> float:
     """Calculates percentage change between two values."""
     if old_val == 0:
         return 0.0 if new_val == 0 else np.inf * (1 if new_val > 0 else -1)
     return (new_val - old_val) / abs(old_val)
+
 
 def normalize_price(series: pd.Series) -> pd.Series:
     """
@@ -17,6 +19,7 @@ def normalize_price(series: pd.Series) -> pd.Series:
     if min_val == max_val:
         return pd.Series(0.0, index=series.index)
     return (series - min_val) / (max_val - min_val)
+
 
 def compute_returns(df: pd.DataFrame, price_col: str = "close") -> pd.Series:
     """
