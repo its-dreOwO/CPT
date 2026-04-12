@@ -1,0 +1,88 @@
+# ============================================================
+# CPT — Crypto Price Tracker/Predictor
+# Production Dependencies
+# Python 3.11+
+# Install: pip install -r requirements.txt
+# ============================================================
+
+# ------------------------------------------------------------
+# Data Collection — APIs & Scrapers
+# ------------------------------------------------------------
+fredapi>=0.5.1              # FRED API: interest rates (FEDFUNDS, DGS10), M2 money supply
+yfinance>=0.2.40            # Yahoo Finance: DXY index (DX-Y.NYB), OHLCV price history
+ccxt>=4.3.0                 # Unified crypto exchange APIs (Binance, Bybit): real-time prices
+tweepy>=4.14.0              # Twitter/X API v2: keyword search, timeline, streaming
+praw>=7.7.1                 # Reddit API: subreddit posts, comments, upvote scores
+telethon>=1.36.0            # Telegram MTProto client: monitor public crypto channels
+httpx>=0.27.0               # Async HTTP client: Zalo OA API, Glassnode REST, WhatsApp
+aiohttp>=3.9.5              # High-throughput async HTTP for scrapers
+beautifulsoup4>=4.12.3      # HTML parsing fallback for non-API sources
+
+# ------------------------------------------------------------
+# On-Chain Analytics
+# ------------------------------------------------------------
+solana>=0.34.0              # Solana RPC client: account lookups, transaction history
+solders>=0.21.0             # Official Solana Python types: pubkey, transaction parsing
+python-bitcoinrpc>=1.0      # Dogecoin Core JSON-RPC (bitcoin-compatible protocol)
+web3>=7.0.0                 # EVM interactions and cross-chain data fallback
+
+# ------------------------------------------------------------
+# NLP / Sentiment Analysis
+# ------------------------------------------------------------
+transformers>=4.41.0        # HuggingFace: load FinBERT (ProsusAI/finbert) and CryptoBERT (ElKulako/cryptobert)
+torch>=2.3.0                # PyTorch: backend for all transformer and LSTM models
+vaderSentiment>=3.3.2       # Rule-based sentiment: fast baseline, no GPU, compound score [-1, +1]
+spacy>=3.7.4                # NER and token filtering for crypto terminology
+langdetect>=1.0.9           # Detect and filter non-English posts before scoring
+emoji>=2.12.1               # Convert emoji to text tokens before NLP preprocessing
+nltk>=3.8.1                 # Stopwords, tokenization for text preprocessing
+datasets>=2.19.0            # HuggingFace datasets: used if fine-tuning models
+
+# ------------------------------------------------------------
+# ML / Deep Learning — Forecasting Models
+# ------------------------------------------------------------
+# torch already listed above
+pytorch-forecasting>=1.0.0  # Temporal Fusion Transformer (TFT): multi-horizon time-series
+pytorch-lightning>=2.2.0    # Training framework: callbacks, early stopping, checkpointing
+xgboost>=2.0.3              # Gradient boosted trees: regime detection, feature importance
+lightgbm>=4.3.0             # LightGBM: faster GBDT, handles high-cardinality features
+scikit-learn>=1.5.0         # Preprocessing pipelines, cross-validation, ensemble stacking
+optuna>=3.6.1               # Hyperparameter tuning: Bayesian optimization for all models
+numpy>=1.26.4               # Numerical arrays, rolling calculations
+pandas>=2.2.2               # DataFrames: time-series alignment, feature engineering
+ta>=0.11.0                  # Technical indicators: RSI, MACD, Bollinger Bands as features
+
+# ------------------------------------------------------------
+# Notifications — Discord, WhatsApp, Zalo
+# ------------------------------------------------------------
+discord.py>=2.3.2           # Discord bot and webhook: rich embeds, file attachments
+twilio>=9.0.5               # Twilio WhatsApp API: send messages and media
+jinja2>=3.1.4               # Template engine: platform-specific message formatting
+matplotlib>=3.9.0           # Generate price forecast chart PNGs for notifications
+plotly>=5.22.0              # Interactive charts (exported as PNG for Discord)
+Pillow>=10.3.0              # Image post-processing before sending to platforms
+kaleido>=0.2.1              # Required by plotly for static image export
+
+# ------------------------------------------------------------
+# Infrastructure & Utilities
+# ------------------------------------------------------------
+pydantic>=2.7.1             # Data validation schemas throughout codebase
+pydantic-settings>=2.3.0    # .env file loading with type-safe config (BaseSettings)
+sqlalchemy>=2.0.30          # ORM for SQLite/PostgreSQL: PriceData, Prediction, SentimentScore
+alembic>=1.13.1             # Database schema migrations
+redis>=5.0.4                # Response caching (TTL-based) and alert deduplication
+apscheduler>=3.10.4         # In-process cron scheduler: 15min fetch, 1h prediction jobs
+structlog>=24.2.0           # Structured JSON logging for all engines and pipeline
+python-dotenv>=1.0.1        # .env file loading in non-Pydantic contexts
+tenacity>=8.3.0             # Retry with exponential backoff for all API calls
+
+# ------------------------------------------------------------
+# Live Server
+# ------------------------------------------------------------
+fastapi>=0.111.0            # Async web framework: REST API + WebSocket endpoints
+uvicorn[standard]>=0.30.0   # ASGI server to run FastAPI in production
+
+# ------------------------------------------------------------
+# TimesFM — Google's Time Series Foundation Model
+# ------------------------------------------------------------
+git+https://github.com/google-research/timesfm  # TimesFM 2.5: zero-shot forecasting, 16k context

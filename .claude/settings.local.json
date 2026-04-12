@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where python:*)",
+      "Bash(python -m venv .venv)",
+      "Bash(.venv/Scripts/python.exe -m pip install --upgrade pip setuptools wheel)",
+      "Bash(.venv/Scripts/python.exe -m pip install -r requirements.txt)",
+      "Bash(tee install_prod.log)",
+      "Bash(.venv/Scripts/python.exe -m pip install -r requirements-dev.txt)",
+      "Bash(.venv/Scripts/python.exe -c ':*)",
+      "Bash(.venv/Scripts/python.exe -c \"from config.settings import settings; print\\('settings OK:', type\\(settings\\).__name__\\)\")",
+      "Bash(nvidia-smi)",
+      "Bash(nvcc --version)",
+      "Bash(.venv/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu128)",
+      "Bash(.venv/Scripts/python.exe -m pip install --force-reinstall torch --index-url https://download.pytorch.org/whl/cu128)",
+      "Bash(.venv/Scripts/python.exe -c \"import torch; print\\('torch:', torch.__version__\\); print\\('CUDA available:', torch.cuda.is_available\\(\\)\\); print\\('GPU:', torch.cuda.get_device_name\\(0\\) if torch.cuda.is_available\\(\\) else 'N/A'\\)\")",
+      "WebSearch",
+      "Bash(mkdir -p server/routes engines/prices)",
+      "Bash(touch server/__init__.py server/app.py server/websocket_manager.py server/routes/__init__.py server/routes/predictions.py server/routes/health.py engines/prices/__init__.py engines/prices/price_stream.py engines/prices/price_aggregator.py engines/forecasting/timesfm_model.py)",
+      "Bash(.venv/Scripts/python.exe -m pip install \"fastapi>=0.111.0\" \"uvicorn[standard]>=0.30.0\")",
+      "Bash(.venv/Scripts/python.exe -m pip install \"git+https://github.com/google-research/timesfm\")",
+      "Bash(tasklist /FI \"IMAGENAME eq python.exe\")",
+      "Bash(tasklist /FI \"IMAGENAME eq python3.exe\")",
+      "Bash(tasklist)"
+    ]
+  }
+}

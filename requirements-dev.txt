@@ -1,0 +1,30 @@
+# ============================================================
+# CPT — Development & Testing Dependencies
+# Install: pip install -r requirements.txt -r requirements-dev.txt
+# ============================================================
+
+# ------------------------------------------------------------
+# Testing
+# ------------------------------------------------------------
+pytest>=8.2.0               # Test framework
+pytest-asyncio>=0.23.7      # Async test support (asyncio engine)
+pytest-mock>=3.14.0         # Mock external API calls in unit tests
+pytest-timeout>=2.3.1       # Timeout support for integration tests (--timeout=30)
+freezegun>=1.5.1            # Freeze time in tests for deterministic timestamp behavior
+responses>=0.25.3           # Mock HTTP responses for requests-based API clients
+respx>=0.21.1               # Mock HTTP responses for httpx-based clients
+
+# ------------------------------------------------------------
+# Code Quality
+# ------------------------------------------------------------
+black>=24.4.2               # Code formatter (line-length=100)
+ruff>=0.4.5                 # Fast linter: replaces flake8 + isort
+mypy>=1.10.0                # Static type checking
+types-requests>=2.32.0      # Type stubs for requests library
+types-redis>=4.6.0          # Type stubs for redis library
+
+# ------------------------------------------------------------
+# Notebooks
+# ------------------------------------------------------------
+ipykernel>=6.29.4           # Jupyter kernel for notebooks/ exploration
+jupyterlab>=4.2.0           # JupyterLab UI (optional, for notebook work)
