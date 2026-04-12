@@ -79,6 +79,19 @@ EXCHANGE_WALLETS_DOGE: Final[dict[str, list[str]]] = {
     ],
 }
 
+# Minimum USD value for a wallet to be classified as a whale
+WHALE_THRESHOLD_USD: Final[float] = 500_000.0
+
+# Known large SOL/DOGE wallets to monitor (populate as discovered)
+# Format: plain Base58 address strings
+WHALE_WALLETS_SOL: Final[list[str]] = [
+    # Add known large SOL holder addresses here
+]
+
+WHALE_WALLETS_DOGE: Final[list[str]] = [
+    # Add known large DOGE holder addresses here
+]
+
 # ============================================================
 # Sentiment Analysis
 # ============================================================
