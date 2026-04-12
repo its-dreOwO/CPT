@@ -62,13 +62,13 @@
 
 ## PHASE D — On-Chain Engine
 
-- [ ] **D1a** Implement `engines/onchain/defillama_client.py` -- DeFiLlama REST API: SOL chain TVL, DeFi protocol count (free, no key)
-- [ ] **D1b** Implement `engines/onchain/blockchair_client.py` -- Blockchair REST API: DOGE active addresses, daily tx count (free, 1000 req/day limit)
-- [ ] **D2** Implement `engines/onchain/sol_rpc_client.py` — Solana RPC: account + tx queries
-- [ ] **D3** Implement `engines/onchain/doge_rpc_client.py` — Dogecoin Core JSON-RPC
-- [ ] **D4** Implement `engines/onchain/whale_detector.py` — classify wallets >$500k
-- [ ] **D5** Implement `engines/onchain/exchange_flow.py` — net inflow/outflow to exchanges
-- [ ] **D6** Implement `engines/onchain/onchain_aggregator.py` — merge SOL + DOGE on-chain
+- [x] **D1a** Implement `engines/onchain/defillama_client.py` -- DeFiLlama REST API: SOL chain TVL, DeFi protocol count (free, no key)
+- [x] **D1b** Implement `engines/onchain/blockchair_client.py` -- Blockchair REST API: DOGE active addresses, daily tx count (free, 1000 req/day limit)
+- [x] **D2** Implement `engines/onchain/sol_rpc_client.py` — Solana RPC: account + tx queries
+- [x] **D3** Implement `engines/onchain/doge_rpc_client.py` — Dogecoin Core JSON-RPC
+- [x] **D4** Implement `engines/onchain/whale_detector.py` — classify wallets >$500k
+- [x] **D5** Implement `engines/onchain/exchange_flow.py` — net inflow/outflow to exchanges
+- [x] **D6** Implement `engines/onchain/onchain_aggregator.py` — merge SOL + DOGE on-chain
 
 ---
 
