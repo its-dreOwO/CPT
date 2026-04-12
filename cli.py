@@ -1,12 +1,12 @@
 import argparse
 import sys
-import os
 import json
 import httpx
 
 # In the future, this could hit specific endpoints.
 # For now, it interacts via REST API or modifies local configuration states (e.g., Redis).
 SERVER_URL = "http://localhost:8000"
+
 
 def get_status():
     """Fetches the current status of the CPT server."""
@@ -17,6 +17,7 @@ def get_status():
     except Exception as e:
         print(f"Error fetching status: {e}")
         print("Make sure the CPT server is running.")
+
 
 def toggle_notification(channel: str, state: str):
     """
@@ -32,23 +33,30 @@ def toggle_notification(channel: str, state: str):
     except Exception as e:
         print(f"❌ Failed to toggle notification channel: {e}")
 
+
 def main():
     parser = argparse.ArgumentParser(description="CPT (Crypto Price Tracker) Management CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Status Command
-    status_parser = subparsers.add_parser("status", help="Get the current status of all engines and models")
+    subparsers.add_parser("status", help="Get the current status of all engines and models")
 
     # Notifications Command
     notify_parser = subparsers.add_parser("notify", help="Manage notification channels")
     notify_parser.add_parser("list", help="List all notification channels and their status")
-    
-    toggle_parser = notify_parser.add_subparsers(dest="toggle_cmd", help="Toggle a notification channel")
+
+    toggle_parser = notify_parser.add_subparsers(
+        dest="toggle_cmd", help="Toggle a notification channel"
+    )
     enable_parser = toggle_parser.add_parser("enable", help="Enable a channel")
-    enable_parser.add_argument("channel", choices=["discord", "whatsapp", "zalo", "all"], help="Channel to enable")
-    
+    enable_parser.add_argument(
+        "channel", choices=["discord", "whatsapp", "zalo", "all"], help="Channel to enable"
+    )
+
     disable_parser = toggle_parser.add_parser("disable", help="Disable a channel")
-    disable_parser.add_argument("channel", choices=["discord", "whatsapp", "zalo", "all"], help="Channel to disable")
+    disable_parser.add_argument(
+        "channel", choices=["discord", "whatsapp", "zalo", "all"], help="Channel to disable"
+    )
 
     # Predictions Command
     pred_parser = subparsers.add_parser("predict", help="Get latest predictions")
@@ -80,6 +88,7 @@ def main():
     else:
         parser.print_help()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

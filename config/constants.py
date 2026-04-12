@@ -38,9 +38,9 @@ YFINANCE_TICKERS: Final[dict[str, str]] = {
 # ============================================================
 
 FRED_SERIES: Final[dict[str, str]] = {
-    "fed_funds_rate": "FEDFUNDS",   # Effective Federal Funds Rate
-    "treasury_10y": "DGS10",         # 10-Year Treasury Constant Maturity Rate
-    "m2_supply": "M2SL",             # M2 Money Supply
+    "fed_funds_rate": "FEDFUNDS",  # Effective Federal Funds Rate
+    "treasury_10y": "DGS10",  # 10-Year Treasury Constant Maturity Rate
+    "m2_supply": "M2SL",  # M2 Money Supply
 }
 
 # yfinance symbol for US Dollar Index
@@ -85,9 +85,9 @@ EXCHANGE_WALLETS_DOGE: Final[dict[str, list[str]]] = {
 
 # Weighted average applied in sentiment_aggregator.py
 SENTIMENT_WEIGHTS: Final[dict[str, float]] = {
-    "cryptobert": 0.5,   # Best for social slang
-    "finbert": 0.3,      # Best for macro/news text
-    "vader": 0.2,        # Fast baseline
+    "cryptobert": 0.5,  # Best for social slang
+    "finbert": 0.3,  # Best for macro/news text
+    "vader": 0.2,  # Fast baseline
 }
 
 # HuggingFace model IDs — Sentiment
@@ -131,16 +131,16 @@ PREDICTION_HORIZONS_HOURS: Final[list[int]] = [24, 72, 168]  # 1d, 3d, 7d
 TIMESFM_MODEL_ID: Final[str] = "google/timesfm-2.5-200m-pytorch"
 # Context length: 16,000 hourly steps (~667 days). Max horizon: 1,000 steps.
 # Zero-shot: no training needed. Quantile output: 10th–90th percentile bands.
-TIMESFM_CONTEXT_LEN: Final[int] = 512    # start conservative; increase after testing
-TIMESFM_HORIZON_LEN: Final[int] = 168    # max horizon we need = 7d = 168 hours
+TIMESFM_CONTEXT_LEN: Final[int] = 512  # start conservative; increase after testing
+TIMESFM_HORIZON_LEN: Final[int] = 168  # max horizon we need = 7d = 168 hours
 
 # Default ensemble weights (5 models — tuned by Optuna during training)
 # TimesFM gets top weight: pre-trained on 400B+ real-world time points, zero-shot
 DEFAULT_ENSEMBLE_WEIGHTS: Final[dict[str, float]] = {
-    "timesfm": 0.30,   # Foundation model, zero-shot, strongest raw price signal
-    "tft": 0.25,       # Multi-horizon, uses all features (macro+onchain+sentiment)
-    "lstm": 0.20,      # Sequence memory on full feature set
-    "xgboost": 0.15,   # Regime detection, interpretable
+    "timesfm": 0.30,  # Foundation model, zero-shot, strongest raw price signal
+    "tft": 0.25,  # Multi-horizon, uses all features (macro+onchain+sentiment)
+    "lstm": 0.20,  # Sequence memory on full feature set
+    "xgboost": 0.15,  # Regime detection, interpretable
     "lightgbm": 0.10,  # Tabular complement to XGBoost
 }
 
@@ -160,23 +160,23 @@ LSTM_CONFIG: Final[dict[str, int | float]] = {
 
 RATE_LIMITS_PER_MIN: Final[dict[str, int]] = {
     "fred": 120,
-    "defillama": 30,       # Free, no key. Be polite.
-    "blockchair": 30,      # Free tier: 1000 req/day hard cap, 30/min
-    "twitter": 300,        # Basic tier
-    "reddit": 30,          # Public JSON endpoints, be polite
-    "discord": 30,         # Per webhook
-    "solana_rpc": 100,     # Depends on provider
-    "yfinance": 2000,      # No official limit, be polite
+    "defillama": 30,  # Free, no key. Be polite.
+    "blockchair": 30,  # Free tier: 1000 req/day hard cap, 30/min
+    "twitter": 300,  # Basic tier
+    "reddit": 30,  # Public JSON endpoints, be polite
+    "discord": 30,  # Per webhook
+    "solana_rpc": 100,  # Depends on provider
+    "yfinance": 2000,  # No official limit, be polite
 }
 
 # ============================================================
 # Cache TTLs (seconds) for storage/cache_manager.py
 # ============================================================
 
-CACHE_TTL_API_RESPONSE: Final[int] = 5 * 60          # 5 minutes
-CACHE_TTL_SENTIMENT_SCORE: Final[int] = 15 * 60      # 15 minutes
-CACHE_TTL_PREDICTION: Final[int] = 60 * 60           # 1 hour
-CACHE_TTL_ALERT_DEDUP: Final[int] = 60 * 60          # 1 hour (prevents duplicate alerts)
+CACHE_TTL_API_RESPONSE: Final[int] = 5 * 60  # 5 minutes
+CACHE_TTL_SENTIMENT_SCORE: Final[int] = 15 * 60  # 15 minutes
+CACHE_TTL_PREDICTION: Final[int] = 60 * 60  # 1 hour
+CACHE_TTL_ALERT_DEDUP: Final[int] = 60 * 60  # 1 hour (prevents duplicate alerts)
 
 # ============================================================
 # Live Server
@@ -186,7 +186,7 @@ CACHE_TTL_ALERT_DEDUP: Final[int] = 60 * 60          # 1 hour (prevents duplicat
 LIVE_PREDICTION_TRIGGER_PCT: Final[float] = 1.0
 
 # Maximum time (seconds) between predictions even without a price move
-LIVE_PREDICTION_MAX_INTERVAL_SEC: Final[int] = 5 * 60   # 5 minutes
+LIVE_PREDICTION_MAX_INTERVAL_SEC: Final[int] = 5 * 60  # 5 minutes
 
 # WebSocket heartbeat interval (seconds)
 WS_HEARTBEAT_SEC: Final[int] = 30

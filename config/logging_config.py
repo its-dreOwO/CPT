@@ -2,6 +2,7 @@ import logging
 import sys
 import structlog
 
+
 def setup_logging(log_level: int = logging.INFO):
     """Initializes structlog to format logs as JSON locally and in production."""
     logging.basicConfig(
@@ -18,7 +19,7 @@ def setup_logging(log_level: int = logging.INFO):
             structlog.processors.TimeStamper(fmt="iso", utc=True),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
-            structlog.processors.JSONRenderer()
+            structlog.processors.JSONRenderer(),
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=structlog.stdlib.LoggerFactory(),

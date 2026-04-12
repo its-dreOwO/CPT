@@ -26,7 +26,7 @@ Exposes REST + WebSocket API for live prediction streaming.
 
 | Engine | Status | Notes |
 |--------|--------|-------|
-| Foundation (config, utils, storage) | Not started | Build first -- unblocks everything |
+| Foundation (config, utils, storage) | **COMPLETE** | All A1-A13 tasks done |
 | Engine 1: Macroeconomic | Not started | FRED + yfinance + DXY |
 | Engine 2: On-Chain | Not started | Solana RPC + DOGE RPC + Glassnode |
 | Engine 3: Sentiment | Not started | Twitter + Reddit + Telegram + NLP models |
@@ -42,7 +42,7 @@ Exposes REST + WebSocket API for live prediction streaming.
 
 | Service | Env Var | Status |
 |---------|---------|--------|
-| FRED | `FRED_API_KEY` | DONE -- Obtained and verified 2026-04-11 |
+| FRED | `FRED_API_KEY` | DONE -- Obtained, verified, and loaded into .env |
 | DeFiLlama | None (no key) | DONE -- Free, no key needed. Replaces Glassnode for SOL metrics |
 | Blockchair | None (no key) | DONE -- Free tier, no key needed. Replaces Glassnode for DOGE metrics |
 | Twitter/X | `TWITTER_BEARER_TOKEN` | Not obtained |
@@ -245,3 +245,15 @@ renamed to defillama_client.py and blockchair_client.py when those modules are i
 - `logging_config.py` (Structlog JSON setup)
 - `storage/database.py` & `storage/models.py` (SQLAlchemy setup and ORM models for PriceData, Prediction, SentimentScore)
 Also implemented `cli.py` at the project root to satisfy the user's request for a command-line interface to interact with the system (status, predictions, and notification toggles) until a web UI is built. Updated CLAUDE.md and TASKS.md accordingly.
+
+**2026-04-12 (session 5):** Completed Phase A fully (A10-A13) + GitHub setup.
+- `storage/price_repository.py` — `upsert_candle()`, `get_range()`
+- `storage/prediction_repository.py` — `save()`, `get_latest()`, `get_history()`
+- `storage/cache_manager.py` — Redis wrapper with TTL, graceful fallback if Redis not running
+- `scripts/setup_db.py` — creates all ORM tables via `Base.metadata.create_all()`
+- FRED API key loaded into `.env` (gitignored, not committed)
+- GitHub repo created: https://github.com/its-dreOwO/CPT
+- Branching strategy: `main` (production) ← `develop` (integration) ← `feature/*`
+- CI workflow: `.github/workflows/ci.yml` — ruff + black + mypy + pytest on every PR
+- PR template and issue templates added to `.github/`
+- Branch protection rules to be configured manually on GitHub settings page
