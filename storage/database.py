@@ -12,7 +12,9 @@ db_url = settings.DATABASE_URL
 # If SQLite, ensure we don't crash because the 'data/' folder is missing
 if db_url.startswith("sqlite"):
     db_path = db_url.replace("sqlite:///", "")
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    db_dir = os.path.dirname(db_path)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
     # Adding check_same_thread=False for SQLite in multithreaded (FastAPI) environments
     engine = create_engine(db_url, echo=False, connect_args={"check_same_thread": False})
 else:

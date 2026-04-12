@@ -1,6 +1,10 @@
 # Secrets
 .env
 
+# AI session files (local only)
+CLAUDE.md
+memory/
+
 # Data (large files, regenerable)
 data/
 !data/.gitkeep
