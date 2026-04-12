@@ -47,16 +47,16 @@
 
 ## PHASE C — Sentiment Engine
 
-- [ ] **C1** Implement `engines/sentiment/text_preprocessor.py` — URL removal, emoji, lang filter
-- [ ] **C2** Implement `engines/sentiment/vader_scorer.py` — VADER compound score [-1, +1]
-- [ ] **C3** Implement `engines/sentiment/reddit_scraper.py` — httpx JSON scraping: r/solana, r/dogecoin (no API key needed)
-- [ ] **C4** Implement `engines/sentiment/twitter_scraper.py` — Tweepy v2: $SOL, $DOGE search
-- [ ] **C5** Implement `engines/sentiment/telegram_scraper.py` — Telethon: public channels
-- [ ] **C6** Implement `engines/sentiment/finbert_scorer.py` — ProsusAI/finbert inference
-- [ ] **C7** Implement `engines/sentiment/cryptobert_scorer.py` — ElKulako/cryptobert inference
-- [ ] **C8** Implement `engines/sentiment/elon_tracker.py` — @elonmusk DOGE signal + 3x multiplier
-- [ ] **C9** Implement `engines/sentiment/sentiment_aggregator.py` — weighted average (0.5/0.3/0.2)
-- [ ] **C10** Implement `engines/sentiment/sentiment_features.py` — rolling windows, momentum
+- [x] **C1** Implement `engines/sentiment/text_preprocessor.py` — URL removal, emoji, lang filter
+- [x] **C2** Implement `engines/sentiment/vader_scorer.py` — VADER compound score [-1, +1]
+- [x] **C3** Implement `engines/sentiment/reddit_scraper.py` — httpx JSON scraping: r/solana, r/dogecoin (no API key needed)
+- [x] **C4** Implement `engines/sentiment/twitter_scraper.py` — **DISABLED (401 on free tier)**; stub returns [] with warning. Re-enable when API upgraded.
+- [x] **C5** Implement `engines/sentiment/telegram_scraper.py` — Telethon: public channels
+- [x] **C6** Implement `engines/sentiment/finbert_scorer.py` — ProsusAI/finbert inference
+- [x] **C7** Implement `engines/sentiment/cryptobert_scorer.py` — ElKulako/cryptobert; labels: Bullish=+1, Bearish=-1
+- [x] **C8** Implement `engines/sentiment/elon_tracker.py` — stub returns 1.0 (no-op); full logic gated behind Twitter re-enable
+- [x] **C9** Implement `engines/sentiment/sentiment_aggregator.py` — weighted average CryptoBERT=0.5, FinBERT=0.3, VADER=0.2
+- [x] **C10** Implement `engines/sentiment/sentiment_features.py` — 4h/24h/72h MAs, momentum, divergence
 
 ---
 
