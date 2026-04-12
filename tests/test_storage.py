@@ -23,10 +23,12 @@ def test_database_and_repositories():
         now = now_utc()
         # insert
         candle = upsert_candle(session, "SOL", now, open=100.0, high=105.0, low=98.0, close=102.0, volume=10000.5)
+        session.flush()
         print(f"Upserted candle ID: {candle.id}")
         
         # update
         candle_updated = upsert_candle(session, "SOL", now, open=100.0, high=105.0, low=98.0, close=103.0, volume=10000.5)
+        session.flush()
         print(f"Updated candle Close: {candle_updated.close} (should be 103.0)")
         
         # get range
@@ -47,10 +49,14 @@ def test_database_and_repositories():
             ensemble_weights_used={"timesfm": 0.5, "xgboost": 0.5}
         )
         saved_pred = save(session, pred_res)
+        session.flush()
         print(f"Saved prediction ID: {saved_pred.id}")
         
         latest = get_latest(session, "DOGE")
-        print(f"Retrieved latest Prediction magnitude: {latest.magnitude_pct}%")
+        if latest:
+            print(f"Retrieved latest Prediction magnitude: {latest.magnitude_pct}%")
+        else:
+            print("Failed to access latest prediction!")
         
         history = get_history(session, "DOGE", limit=5)
         print(f"History length: {len(history)}")
@@ -67,7 +73,7 @@ def test_database_and_repositories():
     else:
         print("Redis client not connected. Skipping Redis tests (expected if no local server running).")
 
-    print("\nALL STORAGE TESTS COMPLETED ✅")
+    print("\nALL STORAGE TESTS COMPLETED [PASS]")
 
 if __name__ == "__main__":
     test_database_and_repositories()

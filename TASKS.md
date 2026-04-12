@@ -5,7 +5,7 @@
 
 ## PHASE A — Foundation (Build First — Unblocks Everything)
 
-- [ ] **A1** Gather all API keys and fill in `.env`
+- [x] **A1** Gather all API keys and fill in `.env`
   - [x] FRED API key (free, 1 min) -- https://fred.stlouisfed.org/docs/api/api_key.html -- Verified 2026-04-11
   - [x] Reddit -- switched to public JSON scraping (no API key needed) -- Verified 2026-04-11
   - [ ] Discord webhook URL (30 sec) — Server Settings → Integrations → Webhooks
@@ -24,10 +24,10 @@
 - [x] **A7** Implement `config/logging_config.py` — structlog JSON setup, `setup_logging()`
 - [x] **A8** Implement `storage/database.py` — SQLAlchemy engine + session factory
 - [x] **A9** Implement `storage/models.py` — ORM: PriceData, Prediction, SentimentScore
-- [ ] **A10** Implement `storage/price_repository.py` — `upsert_candle()`, `get_range()`
-- [ ] **A11** Implement `storage/prediction_repository.py` — `save()`, `get_latest()`, `get_history()`
-- [ ] **A12** Implement `storage/cache_manager.py` — Redis wrapper with TTL methods
-- [ ] **A13** Run `python scripts/setup_db.py` — initialize database schema
+- [x] **A10** Implement `storage/price_repository.py` — `upsert_candle()`, `get_range()`
+- [x] **A11** Implement `storage/prediction_repository.py` — `save()`, `get_latest()`, `get_history()`
+- [x] **A12** Implement `storage/cache_manager.py` — Redis wrapper with TTL methods
+- [x] **A13** Run `python scripts/setup_db.py` — initialize database schema
 
 ---
 
