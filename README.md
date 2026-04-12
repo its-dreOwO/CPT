@@ -178,7 +178,7 @@ make format
 | A — Foundation (config, utils, storage) | Complete |
 | B — Data Collection (macro, prices) | Complete |
 | C — Sentiment Engine | Complete |
-| D — On-Chain Engine | Pending |
+| D — On-Chain Engine | Complete |
 | E — ML Models | Pending |
 | F — Live Server & Pipeline | Pending |
 | G — Notifications | Pending |
