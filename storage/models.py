@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, JSON
+from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, UniqueConstraint
 from storage.database import Base
 
 
 class PriceData(Base):
     __tablename__ = "price_data"
+    __table_args__ = (UniqueConstraint("coin", "timestamp", name="uq_price_coin_timestamp"),)
 
     id = Column(Integer, primary_key=True, index=True)
     coin = Column(String, index=True, nullable=False)

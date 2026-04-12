@@ -2,14 +2,13 @@ import redis
 import json
 import logging
 from typing import Any, Optional
-from config.settings import Settings
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
 
 class CacheManager:
     def __init__(self):
-        settings = Settings()
         try:
             self.client = redis.from_url(settings.REDIS_URL, decode_responses=True)
             # ping to ensure connected

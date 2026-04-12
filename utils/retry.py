@@ -73,3 +73,7 @@ def with_retry(
             return sync_wrapper
 
     return decorator
+
+
+# Alias — CLAUDE.md and OVERVIEW.md document this as @retry
+retry = with_retry
