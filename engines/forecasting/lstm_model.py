@@ -52,10 +52,25 @@ def build_model(input_size: int) -> LSTMModel:
     ).to(DEVICE)
 
 
-def save(model: LSTMModel, coin: str, date_tag: str) -> str:
+def save(
+    model: LSTMModel,
+    coin: str,
+    date_tag: str,
+    mean: Optional[np.ndarray] = None,
+    std: Optional[np.ndarray] = None,
+) -> str:
+    """Save model weights and feature-normalisation stats to a single .pt file."""
     os.makedirs(MODELS_DIR, exist_ok=True)
     path = os.path.join(MODELS_DIR, f"lstm_{coin.lower()}_{date_tag}.pt")
-    torch.save({"state_dict": model.state_dict(), "input_size": model.lstm.input_size}, path)
+    torch.save(
+        {
+            "state_dict": model.state_dict(),
+            "input_size": model.lstm.input_size,
+            "mean": mean,   # per-feature mean used during training (float32 ndarray or None)
+            "std": std,     # per-feature std  used during training (float32 ndarray or None)
+        },
+        path,
+    )
     logger.info("lstm_saved", coin=coin, path=path)
     return path
 
@@ -66,9 +81,14 @@ def load_latest(coin: str) -> Optional[LSTMModel]:
     if not candidates:
         logger.warning("lstm_no_weights", coin=coin)
         return None
-    ckpt = torch.load(candidates[-1], map_location=DEVICE)
+    # weights_only=False: checkpoint contains numpy arrays (mean/std) which are not
+    # plain tensors; suppress the FutureWarning by being explicit.
+    ckpt = torch.load(candidates[-1], map_location=DEVICE, weights_only=False)
     model = build_model(ckpt["input_size"])
     model.load_state_dict(ckpt["state_dict"])
+    # Attach normalisation stats so predict() can de-mean the input
+    model.feat_mean: Optional[np.ndarray] = ckpt.get("mean")  # type: ignore[assignment]
+    model.feat_std: Optional[np.ndarray] = ckpt.get("std")    # type: ignore[assignment]
     model.eval()
     logger.info("lstm_loaded", coin=coin, path=candidates[-1])
     return model
@@ -79,14 +99,21 @@ def predict(model: LSTMModel, X_seq: np.ndarray) -> dict[str, float]:
 
     Args:
         model: Loaded LSTMModel in eval mode.
-        X_seq: (seq_len, n_features) float32 numpy array.
+        X_seq: (seq_len, n_features) float32 array — raw (un-normalised) features.
 
     Returns:
         Dict with target_24h, target_72h, target_7d.
     """
+    seq = X_seq.astype(np.float32)
+    # Apply the same z-score normalisation used during training
+    mean = getattr(model, "feat_mean", None)
+    std = getattr(model, "feat_std", None)
+    if mean is not None and std is not None:
+        seq = (seq - mean) / std
+
     model.eval()
     with torch.no_grad():
-        x = torch.tensor(X_seq, dtype=torch.float32).unsqueeze(0).to(DEVICE)
+        x = torch.tensor(seq, dtype=torch.float32).unsqueeze(0).to(DEVICE)
         preds = model(x)
     return {
         "target_24h": float(preds[24].cpu().item()),

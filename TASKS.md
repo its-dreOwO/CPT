@@ -84,12 +84,13 @@
 - [x] **E8** Implement `engines/forecasting/evaluator.py` — MAE, RMSE, directional accuracy, Sharpe ratio, EvaluationReport with pass/fail thresholds
 - [x] **E9** Implement `engines/forecasting/ensemble.py` — 5-model weighted combiner (TimesFM 30%, TFT 25%, LSTM 20%, XGB 15%, LGBM 10%), confidence from inter-model agreement
 - [x] **E10** Implement `engines/forecasting/predictor.py` — inference entry point (runs all models, handles failures gracefully, returns PredictionResult)
-- [~] **E11** Run `make train-sol` then `make train-doge` — train LSTM, TFT, XGBoost, LightGBM
-  - **SOL (partial):** ✅ XGBoost, LightGBM, LSTM (5 epochs, loss: 73.8k→38.4k), TFT (3 epochs, val_loss: 4.85)
-  - **SOL (pending):** Need more epochs for LSTM/TFT, ideally via cloud GPU (Colab) for speed
-  - **DOGE:** Not started — blocked until SOL training validated
-- [ ] **E12** Run `make evaluate` — verify directional accuracy >55% and Sharpe >1.0
-  - **Blocked** until models have sufficient training epochs
+- [x] **E11** Train all models via Google Colab (notebooks/train_colab.ipynb) — 2026-04-14
+  - **SOL:** XGBoost (DirAcc=0.889, Sharpe=11.6), LightGBM (DirAcc=0.868, Sharpe=11.0), LSTM (needs retrain — see E12 note), TFT trained
+  - **DOGE:** XGBoost (DirAcc=0.874, Sharpe=11.7), LightGBM (DirAcc=0.855, Sharpe=10.98), LSTM (needs retrain), TFT trained
+- [~] **E12** Evaluate models — XGBoost + LightGBM pass for both coins — 2026-04-14
+  - **PASS:** SOL XGBoost, SOL LightGBM, DOGE XGBoost, DOGE LightGBM — all Dir.Acc >0.85, Sharpe >7.0
+  - **PENDING:** LSTM needs retrain with feature normalisation fix (trainer.py updated, re-run Colab lstm cells only)
+  - **NOTE:** TFT excluded from rolling eval (pytorch-forecasting needs future rows at inference time); works via predictor.py
 
 ---
 

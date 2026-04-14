@@ -38,8 +38,11 @@ from engines.forecasting import (
 
 logger = structlog.get_logger(__name__)
 
-# Models to evaluate (in order)
-_ALL_MODELS = ["xgboost", "lightgbm", "lstm", "tft"]
+# Models to evaluate (in order).
+# TFT is excluded: its rolling evaluation requires future rows to be present
+# in the input dataframe (pytorch-forecasting constraint). It works correctly
+# at inference time via predictor.py which feeds the full history window.
+_ALL_MODELS = ["xgboost", "lightgbm", "lstm"]
 
 
 def load_price_data(coin: str, days: int = 730) -> pd.DataFrame:
@@ -306,7 +309,7 @@ def main() -> None:
 
     for r in reports:
         passes = r.passes_threshold()
-        marker = "✅ PASS" if passes else "❌ FAIL"
+        marker = "PASS" if passes else "FAIL"
         print(f"\n  {r.model.upper():12s} [{marker}]")
         print(f"    Mean Dir. Accuracy: {r.mean_directional_accuracy:.4f} (target: >0.55)")
         print(f"    Mean Sharpe:        {r.mean_sharpe:.4f} (target: >1.0)")

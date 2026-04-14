@@ -75,7 +75,15 @@ def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
     from engines.forecasting import lstm_model
     from config.constants import LSTM_CONFIG
 
-    X_full = feature_df.values.astype(np.float32)
+    X_raw = feature_df.values.astype(np.float32)
+
+    # Z-score normalise every feature column so LSTM gradients stay on a
+    # consistent scale.  Without this, 'close' (~$150) vs 'return_1h' (~0.01)
+    # differ by 4+ orders of magnitude and the model fails to converge.
+    feat_mean = X_raw.mean(axis=0)
+    feat_std = X_raw.std(axis=0) + 1e-8
+    X_full = (X_raw - feat_mean) / feat_std
+
     close = feature_df["close"].values.astype(np.float32)
     y_flat = _make_targets(close)
 
@@ -132,7 +140,8 @@ def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
         logger.info("lstm_epoch", coin=coin, epoch=epoch + 1, loss=round(avg_loss, 6))
 
     date_tag = datetime.now(timezone.utc).strftime("%Y%m%d")
-    lstm_model.save(model, coin, date_tag)
+    # Save normalisation stats alongside the weights so predict() can reproduce them
+    lstm_model.save(model, coin, date_tag, mean=feat_mean, std=feat_std)
     logger.info("trainer_lstm_done", coin=coin)
 
 
