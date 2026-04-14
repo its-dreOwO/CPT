@@ -134,7 +134,7 @@ def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            total_loss += float(loss)
+            total_loss += loss.detach().item()
             n_batches += 1
         avg_loss = total_loss / max(n_batches, 1)
         logger.info("lstm_epoch", coin=coin, epoch=epoch + 1, loss=round(avg_loss, 6))
