@@ -17,7 +17,7 @@ import pandas as pd
 from datetime import datetime, timezone
 from typing import Literal
 
-from config.constants import PREDICTION_HORIZONS_HOURS, SEQUENCE_LENGTH
+from config.constants import PREDICTION_HORIZONS_HOURS
 
 logger = structlog.get_logger(__name__)
 

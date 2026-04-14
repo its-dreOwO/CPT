@@ -290,7 +290,7 @@ def main() -> None:
             continue
 
         if not horizon_data:
-            print(f"  No results (model not trained or insufficient data)")
+            print("  No results (model not trained or insufficient data)")
             continue
 
         report = eval_module.evaluate(coin, model_name, horizon_data)

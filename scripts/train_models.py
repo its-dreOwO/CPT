@@ -26,7 +26,6 @@ import pandas as pd
 from config.constants import COINS, SEQUENCE_LENGTH
 from config.logging_config import setup_logging
 from storage.database import get_session
-from storage.models import PriceData
 from storage.price_repository import get_range
 from engines.forecasting.feature_builder import build_features
 from engines.forecasting import trainer
