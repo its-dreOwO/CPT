@@ -16,6 +16,22 @@ from config.constants import PREDICTION_HORIZONS_HOURS, MODELS_DIR
 
 logger = structlog.get_logger(__name__)
 
+
+def _lgbm_device() -> str:
+    """Return 'cuda' if a CUDA GPU is available, else 'cpu'.
+
+    LightGBM's legacy 'gpu' mode uses OpenCL and emits a noisy
+    'N warning(s) generated.' line for every compiled kernel.
+    The newer 'cuda' backend avoids OpenCL entirely; 'cpu' is
+    the safe fallback on machines without a compatible GPU.
+    """
+    try:
+        import torch
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    except ImportError:
+        return "cpu"
+
+
 _PARAMS: dict = {
     "n_estimators": 500,
     "max_depth": 6,
@@ -23,7 +39,7 @@ _PARAMS: dict = {
     "subsample": 0.8,
     "colsample_bytree": 0.8,
     "objective": "regression",
-    "device": "gpu",
+    "device": _lgbm_device(),
     "verbose": -1,
 }
 
