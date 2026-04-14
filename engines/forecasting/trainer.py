@@ -79,20 +79,27 @@ def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
     close = feature_df["close"].values.astype(np.float32)
     y_flat = _make_targets(close)
 
-    seq_len = SEQUENCE_LENGTH
-    # Build sequences - only as many as we have targets for
+    # Use shorter sequence for training (7 days = 168 hours) to keep tensor size manageable.
+    # Model still learns temporal patterns; at inference time it receives the full
+    # SEQUENCE_LENGTH * 24 window via predictor.py.
+    seq_len = 168  # 7 days × 24 hours
     max_h = max(PREDICTION_HORIZONS_HOURS)
     n_usable = len(X_full) - seq_len - max_h
     if n_usable < 100:
         logger.warning("trainer_lstm_insufficient_data", n_usable=n_usable)
         return
 
-    X_seq = _make_sequences(X_full[: n_usable + seq_len], seq_len)
-    y_tensors = {
-        h: torch.tensor(y_flat[h][:n_usable], dtype=torch.float32)
-        for h in PREDICTION_HORIZONS_HOURS
-        if h in y_flat
-    }
+    # Subsample to keep DataLoader manageable: use every 6th position
+    step = 6
+    indices = list(range(0, n_usable, step))
+    logger.info("trainer_lstm_building", coin=coin, n_total=n_usable, n_samples=len(indices), seq_len=seq_len)
+
+    X_seq = np.stack([X_full[i : i + seq_len] for i in indices], axis=0)
+    y_tensors = {}
+    for h in PREDICTION_HORIZONS_HOURS:
+        if h in y_flat:
+            vals = [y_flat[h][i] for i in indices]
+            y_tensors[h] = torch.tensor(vals, dtype=torch.float32)
 
     model = lstm_model.build_model(input_size=X_full.shape[1])
     optimizer = torch.optim.Adam(model.parameters(), lr=float(LSTM_CONFIG["learning_rate"]))
@@ -103,9 +110,12 @@ def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
     )
     loader = DataLoader(dataset, batch_size=int(LSTM_CONFIG["batch_size"]), shuffle=True)
 
+    logger.info("trainer_lstm_start", coin=coin, epochs=epochs, batches_per_epoch=len(loader))
+
     model.train()
     for epoch in range(epochs):
         total_loss = 0.0
+        n_batches = 0
         for batch in loader:
             x_b = batch[0].to(lstm_model.DEVICE)
             preds = model(x_b)
@@ -117,8 +127,9 @@ def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
             loss.backward()
             optimizer.step()
             total_loss += float(loss)
-        if (epoch + 1) % 10 == 0:
-            logger.info("lstm_epoch", coin=coin, epoch=epoch + 1, loss=round(total_loss, 4))
+            n_batches += 1
+        avg_loss = total_loss / max(n_batches, 1)
+        logger.info("lstm_epoch", coin=coin, epoch=epoch + 1, loss=round(avg_loss, 6))
 
     date_tag = datetime.now(timezone.utc).strftime("%Y%m%d")
     lstm_model.save(model, coin, date_tag)
@@ -129,13 +140,18 @@ def train_tft(feature_df: pd.DataFrame, coin: str, max_epochs: int = 30) -> None
     import lightning.pytorch as pl
     from engines.forecasting import transformer_model
 
-    dataset = transformer_model._make_dataset(feature_df, coin, is_train=True)
+    # Use shorter encoder length for training (168 hours = 7 days) to keep it fast.
+    # Inference uses the full _ENCODER_LEN.
+    train_encoder_len = 168
+    dataset = transformer_model._make_dataset(feature_df, coin, is_train=True, encoder_len=train_encoder_len)
     val_cutoff = int(len(feature_df) * 0.9)
     val_df = feature_df.iloc[val_cutoff:].copy()
-    val_dataset = transformer_model._make_dataset(val_df, coin, is_train=False)
+    val_dataset = transformer_model._make_dataset(val_df, coin, is_train=False, encoder_len=train_encoder_len)
 
     train_loader = dataset.to_dataloader(train=True, batch_size=64, num_workers=0)
     val_loader = val_dataset.to_dataloader(train=False, batch_size=64, num_workers=0)
+
+    logger.info("trainer_tft_start", coin=coin, train_size=len(dataset), val_size=len(val_dataset))
 
     model = transformer_model.build_model(dataset)
     trainer = pl.Trainer(

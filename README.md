@@ -179,7 +179,7 @@ make format
 | B — Data Collection (macro, prices) | Complete |
 | C — Sentiment Engine | Complete |
 | D — On-Chain Engine | Complete |
-| E — ML Models | Pending |
+| E — ML Models | Partial (E1–E10 impl. complete; E11 training partial — SOL XGB/LGBM/LSTM/TFT trained minimal epochs, DOGE not started) |
 | F — Live Server & Pipeline | Pending |
 | G — Notifications | Pending |
 | H — Testing & Hardening | Pending |

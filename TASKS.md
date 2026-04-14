@@ -74,21 +74,22 @@
 
 ## PHASE E — ML Models
 
-- [ ] **E1** Implement `engines/forecasting/feature_builder.py` — canonical feature matrix
-- [ ] **E2** Implement `engines/forecasting/timesfm_model.py` — TimesFM 2.5 zero-shot inference
-  - Model ID: `google/timesfm-2.5-200m-pytorch`
-  - Input: raw hourly close price array, `freq=0`
-  - Output: mean + quantile bands per horizon
-- [ ] **E3** Implement `engines/forecasting/xgboost_model.py` — train + inference wrapper
-- [ ] **E4** Implement `engines/forecasting/lightgbm_model.py` — train + inference wrapper
-- [ ] **E5** Implement `engines/forecasting/lstm_model.py` — PyTorch LSTM (2 layers, hidden=256)
-- [ ] **E6** Implement `engines/forecasting/transformer_model.py` — TFT via pytorch-forecasting
-- [ ] **E7** Implement `engines/forecasting/trainer.py` — training loop, checkpointing
-- [ ] **E8** Implement `engines/forecasting/evaluator.py` — MAE, RMSE, directional accuracy, Sharpe
-- [ ] **E9** Implement `engines/forecasting/ensemble.py` — 5-model weighted combiner
-- [ ] **E10** Implement `engines/forecasting/predictor.py` — inference entry point
-- [ ] **E11** Run `make train-sol` then `make train-doge` — train LSTM, TFT, XGBoost, LightGBM
+- [x] **E1** Implement `engines/forecasting/feature_builder.py` — canonical feature matrix (price + macro + sentiment + onchain, technical indicators: RSI, MACD, Bollinger, moving averages)
+- [x] **E2** Implement `engines/forecasting/timesfm_model.py` — TimesFM 2.5 zero-shot inference (`google/timesfm-2.5-200m-pytorch`, lazy load, fallback on error)
+- [x] **E3** Implement `engines/forecasting/xgboost_model.py` — train + inference wrapper (per-horizon models, CUDA support, date-stamped weights)
+- [x] **E4** Implement `engines/forecasting/lightgbm_model.py` — train + inference wrapper (GPU training, mirrors xgboost structure)
+- [x] **E5** Implement `engines/forecasting/lstm_model.py` — PyTorch LSTM (2 layers, hidden=256, 3 output heads for 24h/72h/7d)
+- [x] **E6** Implement `engines/forecasting/transformer_model.py` — TFT via pytorch-forecasting (TimeSeriesDataSet, multi-horizon attention)
+- [x] **E7** Implement `engines/forecasting/trainer.py` — training loop, checkpointing (trains XGB, LGBM, LSTM, TFT; TimesFM excluded as zero-shot)
+- [x] **E8** Implement `engines/forecasting/evaluator.py` — MAE, RMSE, directional accuracy, Sharpe ratio, EvaluationReport with pass/fail thresholds
+- [x] **E9** Implement `engines/forecasting/ensemble.py` — 5-model weighted combiner (TimesFM 30%, TFT 25%, LSTM 20%, XGB 15%, LGBM 10%), confidence from inter-model agreement
+- [x] **E10** Implement `engines/forecasting/predictor.py` — inference entry point (runs all models, handles failures gracefully, returns PredictionResult)
+- [~] **E11** Run `make train-sol` then `make train-doge` — train LSTM, TFT, XGBoost, LightGBM
+  - **SOL (partial):** ✅ XGBoost, LightGBM, LSTM (5 epochs, loss: 73.8k→38.4k), TFT (3 epochs, val_loss: 4.85)
+  - **SOL (pending):** Need more epochs for LSTM/TFT, ideally via cloud GPU (Colab) for speed
+  - **DOGE:** Not started — blocked until SOL training validated
 - [ ] **E12** Run `make evaluate` — verify directional accuracy >55% and Sharpe >1.0
+  - **Blocked** until models have sufficient training epochs
 
 ---
 
