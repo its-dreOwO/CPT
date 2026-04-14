@@ -55,6 +55,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Claude Code local config (never commit)
+.claude/
+
 # Telegram session files
 *.session
 *.session-journal

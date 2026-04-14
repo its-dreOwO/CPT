@@ -20,11 +20,11 @@ def upsert_candle(
     ).scalar_one_or_none()
 
     if existing:
-        existing.open = open
-        existing.high = high
-        existing.low = low
-        existing.close = close
-        existing.volume = volume
+        existing.open = open  # type: ignore[assignment]
+        existing.high = high  # type: ignore[assignment]
+        existing.low = low  # type: ignore[assignment]
+        existing.close = close  # type: ignore[assignment]
+        existing.volume = volume  # type: ignore[assignment]
         return existing
     else:
         new_candle = PriceData(
