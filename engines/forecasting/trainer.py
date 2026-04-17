@@ -17,7 +17,7 @@ import pandas as pd
 from datetime import datetime, timezone
 from typing import Literal
 
-from config.constants import PREDICTION_HORIZONS_HOURS, SEQUENCE_LENGTH
+from config.constants import PREDICTION_HORIZONS_HOURS
 
 logger = structlog.get_logger(__name__)
 
@@ -68,45 +68,103 @@ def train_lightgbm(feature_df: pd.DataFrame, coin: str) -> None:
     logger.info("trainer_lgbm_done", coin=coin)
 
 
-def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
+def train_lstm(
+    feature_df: pd.DataFrame,
+    coin: str,
+    epochs: int = 100,
+    patience: int = 10,
+) -> None:
+    import copy
     import torch
     import torch.nn as nn
     from torch.utils.data import DataLoader, TensorDataset
     from engines.forecasting import lstm_model
     from config.constants import LSTM_CONFIG
 
-    X_full = feature_df.values.astype(np.float32)
-    close = feature_df["close"].values.astype(np.float32)
-    y_flat = _make_targets(close)
+    X_raw = feature_df.values.astype(np.float32)
 
-    seq_len = SEQUENCE_LENGTH
-    # Build sequences - only as many as we have targets for
+    # Z-score normalise every feature column so LSTM gradients stay on a
+    # consistent scale.  Without this, 'close' (~$150) vs 'return_1h' (~0.01)
+    # differ by 4+ orders of magnitude and the model fails to converge.
+    feat_mean = X_raw.mean(axis=0)
+    feat_std = X_raw.std(axis=0) + 1e-8
+    X_full = (X_raw - feat_mean) / feat_std
+
+    close = feature_df["close"].values.astype(np.float32)
+    close_col_idx = feature_df.columns.tolist().index("close")
+
+    seq_len = 168  # 7 days × 24 hours — matches eval window in evaluate_models.py
     max_h = max(PREDICTION_HORIZONS_HOURS)
     n_usable = len(X_full) - seq_len - max_h
     if n_usable < 100:
         logger.warning("trainer_lstm_insufficient_data", n_usable=n_usable)
         return
 
-    X_seq = _make_sequences(X_full[: n_usable + seq_len], seq_len)
-    y_tensors = {
-        h: torch.tensor(y_flat[h][:n_usable], dtype=torch.float32)
-        for h in PREDICTION_HORIZONS_HOURS
-        if h in y_flat
-    }
+    # Subsample every 6th position; keep chronological order for the train/val split
+    step = 6
+    indices = list(range(0, n_usable, step))
+
+    # 80/20 chronological split — never shuffle before splitting a time series
+    split = int(len(indices) * 0.8)
+    train_idx, val_idx = indices[:split], indices[split:]
+
+    logger.info(
+        "trainer_lstm_building",
+        coin=coin,
+        n_total=n_usable,
+        n_train=len(train_idx),
+        n_val=len(val_idx),
+        seq_len=seq_len,
+    )
+
+    def _make_tensors(idx_list: list[int]) -> TensorDataset:
+        X_seq = np.stack([X_full[i : i + seq_len] for i in idx_list], axis=0)
+        # Target: log return from the last timestep of the sequence to h hours later.
+        # Using log returns makes the model scale-invariant across price regimes.
+        ys = []
+        for h in PREDICTION_HORIZONS_HOURS:
+            log_returns = np.array(
+                [
+                    np.log((close[i + seq_len - 1 + h] + 1e-10) / (close[i + seq_len - 1] + 1e-10))
+                    for i in idx_list
+                ],
+                dtype=np.float32,
+            )
+            ys.append(torch.tensor(log_returns, dtype=torch.float32))
+        return TensorDataset(torch.tensor(X_seq, dtype=torch.float32), *ys)
+
+    train_loader = DataLoader(
+        _make_tensors(train_idx),
+        batch_size=int(LSTM_CONFIG["batch_size"]),
+        shuffle=True,
+    )
+    val_loader = DataLoader(
+        _make_tensors(val_idx),
+        batch_size=int(LSTM_CONFIG["batch_size"]),
+        shuffle=False,
+    )
 
     model = lstm_model.build_model(input_size=X_full.shape[1])
     optimizer = torch.optim.Adam(model.parameters(), lr=float(LSTM_CONFIG["learning_rate"]))
     criterion = nn.MSELoss()
-    dataset = TensorDataset(
-        torch.tensor(X_seq, dtype=torch.float32),
-        *[y_tensors[h] for h in PREDICTION_HORIZONS_HOURS],
-    )
-    loader = DataLoader(dataset, batch_size=int(LSTM_CONFIG["batch_size"]), shuffle=True)
 
-    model.train()
+    logger.info(
+        "trainer_lstm_start",
+        coin=coin,
+        epochs=epochs,
+        patience=patience,
+        batches_per_epoch=len(train_loader),
+    )
+
+    best_val_loss = float("inf")
+    best_state = copy.deepcopy(model.state_dict())
+    epochs_without_improvement = 0
+
     for epoch in range(epochs):
-        total_loss = 0.0
-        for batch in loader:
+        # --- train ---
+        model.train()
+        train_loss, n_train = 0.0, 0
+        for batch in train_loader:
             x_b = batch[0].to(lstm_model.DEVICE)
             preds = model(x_b)
             loss = sum(
@@ -115,13 +173,58 @@ def train_lstm(feature_df: pd.DataFrame, coin: str, epochs: int = 50) -> None:
             )
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-            total_loss += float(loss)
-        if (epoch + 1) % 10 == 0:
-            logger.info("lstm_epoch", coin=coin, epoch=epoch + 1, loss=round(total_loss, 4))
+            train_loss += loss.detach().item()
+            n_train += 1
 
+        # --- validate ---
+        model.eval()
+        val_loss, n_val = 0.0, 0
+        with torch.no_grad():
+            for batch in val_loader:
+                x_b = batch[0].to(lstm_model.DEVICE)
+                preds = model(x_b)
+                loss = sum(
+                    criterion(preds[h], batch[i + 1].to(lstm_model.DEVICE))
+                    for i, h in enumerate(PREDICTION_HORIZONS_HOURS)
+                )
+                val_loss += loss.item()
+                n_val += 1
+
+        avg_train = train_loss / max(n_train, 1)
+        avg_val = val_loss / max(n_val, 1)
+        improved = avg_val < best_val_loss
+
+        if improved:
+            best_val_loss = avg_val
+            best_state = copy.deepcopy(model.state_dict())
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
+
+        logger.info(
+            "lstm_epoch",
+            coin=coin,
+            epoch=epoch + 1,
+            train_loss=round(avg_train, 4),
+            val_loss=round(avg_val, 4),
+            best_val=round(best_val_loss, 4),
+            no_improve=epochs_without_improvement,
+        )
+
+        if epochs_without_improvement >= patience:
+            logger.info(
+                "lstm_early_stop", coin=coin, epoch=epoch + 1, best_val=round(best_val_loss, 4)
+            )
+            break
+
+    # Restore the best weights before saving
+    model.load_state_dict(best_state)
     date_tag = datetime.now(timezone.utc).strftime("%Y%m%d")
-    lstm_model.save(model, coin, date_tag)
+    lstm_model.save(
+        model, coin, date_tag, mean=feat_mean, std=feat_std, close_col_idx=close_col_idx
+    )
     logger.info("trainer_lstm_done", coin=coin)
 
 
@@ -129,13 +232,22 @@ def train_tft(feature_df: pd.DataFrame, coin: str, max_epochs: int = 30) -> None
     import lightning.pytorch as pl
     from engines.forecasting import transformer_model
 
-    dataset = transformer_model._make_dataset(feature_df, coin, is_train=True)
+    # Use shorter encoder length for training (168 hours = 7 days) to keep it fast.
+    # Inference uses the full _ENCODER_LEN.
+    train_encoder_len = 168
+    dataset = transformer_model._make_dataset(
+        feature_df, coin, is_train=True, encoder_len=train_encoder_len
+    )
     val_cutoff = int(len(feature_df) * 0.9)
     val_df = feature_df.iloc[val_cutoff:].copy()
-    val_dataset = transformer_model._make_dataset(val_df, coin, is_train=False)
+    val_dataset = transformer_model._make_dataset(
+        val_df, coin, is_train=False, encoder_len=train_encoder_len
+    )
 
     train_loader = dataset.to_dataloader(train=True, batch_size=64, num_workers=0)
     val_loader = val_dataset.to_dataloader(train=False, batch_size=64, num_workers=0)
+
+    logger.info("trainer_tft_start", coin=coin, train_size=len(dataset), val_size=len(val_dataset))
 
     model = transformer_model.build_model(dataset)
     trainer = pl.Trainer(

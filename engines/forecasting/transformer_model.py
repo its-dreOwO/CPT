@@ -26,7 +26,9 @@ _MAX_HORIZON = max(PREDICTION_HORIZONS_HOURS)
 _ENCODER_LEN = SEQUENCE_LENGTH * 24  # 60 days of hourly history
 
 
-def _make_dataset(df: pd.DataFrame, coin: str, is_train: bool = True) -> TimeSeriesDataSet:
+def _make_dataset(
+    df: pd.DataFrame, coin: str, is_train: bool = True, encoder_len: int | None = None
+) -> TimeSeriesDataSet:
     """Wrap feature DataFrame into a pytorch-forecasting TimeSeriesDataSet."""
     df = df.copy()
     df["time_idx"] = range(len(df))
@@ -35,13 +37,15 @@ def _make_dataset(df: pd.DataFrame, coin: str, is_train: bool = True) -> TimeSer
 
     time_varying = [c for c in df.columns if c not in ("time_idx", "group", "target")]
 
+    elen = encoder_len or _ENCODER_LEN
+
     return TimeSeriesDataSet(
         df,
         time_idx="time_idx",
         target="target",
         group_ids=["group"],
-        min_encoder_length=_ENCODER_LEN // 2,
-        max_encoder_length=_ENCODER_LEN,
+        min_encoder_length=elen // 2,
+        max_encoder_length=elen,
         min_prediction_length=1,
         max_prediction_length=_MAX_HORIZON,
         time_varying_unknown_reals=time_varying,

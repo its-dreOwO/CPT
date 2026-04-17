@@ -9,12 +9,22 @@ memory/
 data/
 !data/.gitkeep
 
-# Saved model weights
+# Saved model weights (all formats — never commit trained weights)
 models/*.pt
 models/*.ckpt
 models/*.json
 models/*.pkl
+models/*.txt
 !models/.gitkeep
+
+# pytorch-lightning training checkpoints (local only)
+checkpoints/
+
+# Dashboard static build (not yet implemented)
+server/static/
+
+# Local AI tool folders
+.qwen/
 
 # Python
 __pycache__/

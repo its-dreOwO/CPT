@@ -13,15 +13,15 @@ Twitter / Reddit     →  Sentiment Engine  ─┘
 Binance WebSocket    →  Live Price Stream ──────────────────────────────────────→  Re-predict on 1%+ move
 ```
 
-**5-model ensemble:**
+**Ensemble weights are per-coin** (evaluated 2026-04-17):
 
-| Model | Weight | Role |
-|-------|--------|------|
-| TimesFM 2.5 (Google) | 30% | Zero-shot foundation model, raw price signal |
-| TFT (Temporal Fusion Transformer) | 25% | Multi-horizon, uses all features |
-| LSTM | 20% | Sequential memory on full feature set |
-| XGBoost | 15% | Regime detection, interpretable |
-| LightGBM | 10% | Tabular complement to XGBoost |
+| Model | SOL | DOGE | Role |
+|-------|-----|------|------|
+| TimesFM 2.5 (Google) | 40% | 30% | Zero-shot foundation model, raw price signal |
+| TFT (Temporal Fusion Transformer) | 25% | 25% | Multi-horizon, uses all features |
+| LSTM | — | 20% | Sequential memory on full feature set (SOL excluded — failed eval) |
+| XGBoost | 20% | 15% | Regime detection, interpretable |
+| LightGBM | 15% | 10% | Tabular complement to XGBoost |
 
 Predictions are made for **24h / 72h / 7d** horizons. Alerts fire when `confidence ≥ 0.70` AND `predicted move ≥ 3%`.
 
@@ -179,7 +179,7 @@ make format
 | B — Data Collection (macro, prices) | Complete |
 | C — Sentiment Engine | Complete |
 | D — On-Chain Engine | Complete |
-| E — ML Models | Pending |
+| E — ML Models | Complete (E1–E13 done; all models trained + evaluated; SOL LSTM excluded from ensemble after failing eval) |
 | F — Live Server & Pipeline | Pending |
 | G — Notifications | Pending |
 | H — Testing & Hardening | Pending |

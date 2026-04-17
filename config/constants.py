@@ -147,14 +147,22 @@ TIMESFM_MODEL_ID: Final[str] = "google/timesfm-2.5-200m-pytorch"
 TIMESFM_CONTEXT_LEN: Final[int] = 512  # start conservative; increase after testing
 TIMESFM_HORIZON_LEN: Final[int] = 168  # max horizon we need = 7d = 168 hours
 
-# Default ensemble weights (5 models — tuned by Optuna during training)
-# TimesFM gets top weight: pre-trained on 400B+ real-world time points, zero-shot
+# Default ensemble weights (DOGE — 5 models)
 DEFAULT_ENSEMBLE_WEIGHTS: Final[dict[str, float]] = {
     "timesfm": 0.30,  # Foundation model, zero-shot, strongest raw price signal
     "tft": 0.25,  # Multi-horizon, uses all features (macro+onchain+sentiment)
     "lstm": 0.20,  # Sequence memory on full feature set
     "xgboost": 0.15,  # Regime detection, interpretable
     "lightgbm": 0.10,  # Tabular complement to XGBoost
+}
+
+# SOL-specific weights — LSTM excluded (failed eval: dir acc 0.52, Sharpe -0.27 after tuning)
+# Its 20% redistributed: TimesFM +10%, XGBoost +5%, LightGBM +5%
+SOL_ENSEMBLE_WEIGHTS: Final[dict[str, float]] = {
+    "timesfm": 0.40,
+    "tft": 0.25,
+    "xgboost": 0.20,
+    "lightgbm": 0.15,
 }
 
 # LSTM hyperparameters (defaults, tuned by Optuna)
