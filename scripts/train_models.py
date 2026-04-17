@@ -51,10 +51,7 @@ def load_price_data(coin: str, days: int = 730) -> pd.DataFrame:
     with get_session() as session:
         rows = get_range(session, coin, start, end)
         # Extract data inside session context to avoid DetachedInstanceError
-        data = [
-            (r.timestamp, r.open, r.high, r.low, r.close, r.volume)
-            for r in rows
-        ]
+        data = [(r.timestamp, r.open, r.high, r.low, r.close, r.volume) for r in rows]
 
     if not data:
         logger.warning("train_no_price_data", coin=coin, days=days)

@@ -89,9 +89,9 @@ def load_latest(coin: str) -> Optional[LSTMModel]:
     model = build_model(ckpt["input_size"])
     model.load_state_dict(ckpt["state_dict"])
     # Attach normalisation stats so predict() can de-mean the input
-    model.feat_mean: Optional[np.ndarray] = ckpt.get("mean")          # type: ignore[assignment]
-    model.feat_std: Optional[np.ndarray] = ckpt.get("std")            # type: ignore[assignment]
-    model.close_col_idx: Optional[int] = ckpt.get("close_col_idx")   # type: ignore[assignment]
+    model.feat_mean: Optional[np.ndarray] = ckpt.get("mean")  # type: ignore[assignment]
+    model.feat_std: Optional[np.ndarray] = ckpt.get("std")  # type: ignore[assignment]
+    model.close_col_idx: Optional[int] = ckpt.get("close_col_idx")  # type: ignore[assignment]
     model.eval()
     logger.info("lstm_loaded", coin=coin, path=candidates[-1])
     return model

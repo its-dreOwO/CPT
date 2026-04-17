@@ -26,7 +26,9 @@ _MAX_HORIZON = max(PREDICTION_HORIZONS_HOURS)
 _ENCODER_LEN = SEQUENCE_LENGTH * 24  # 60 days of hourly history
 
 
-def _make_dataset(df: pd.DataFrame, coin: str, is_train: bool = True, encoder_len: int | None = None) -> TimeSeriesDataSet:
+def _make_dataset(
+    df: pd.DataFrame, coin: str, is_train: bool = True, encoder_len: int | None = None
+) -> TimeSeriesDataSet:
     """Wrap feature DataFrame into a pytorch-forecasting TimeSeriesDataSet."""
     df = df.copy()
     df["time_idx"] = range(len(df))

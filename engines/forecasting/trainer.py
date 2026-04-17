@@ -125,10 +125,7 @@ def train_lstm(
         for h in PREDICTION_HORIZONS_HOURS:
             log_returns = np.array(
                 [
-                    np.log(
-                        (close[i + seq_len - 1 + h] + 1e-10)
-                        / (close[i + seq_len - 1] + 1e-10)
-                    )
+                    np.log((close[i + seq_len - 1 + h] + 1e-10) / (close[i + seq_len - 1] + 1e-10))
                     for i in idx_list
                 ],
                 dtype=np.float32,
@@ -217,13 +214,17 @@ def train_lstm(
         )
 
         if epochs_without_improvement >= patience:
-            logger.info("lstm_early_stop", coin=coin, epoch=epoch + 1, best_val=round(best_val_loss, 4))
+            logger.info(
+                "lstm_early_stop", coin=coin, epoch=epoch + 1, best_val=round(best_val_loss, 4)
+            )
             break
 
     # Restore the best weights before saving
     model.load_state_dict(best_state)
     date_tag = datetime.now(timezone.utc).strftime("%Y%m%d")
-    lstm_model.save(model, coin, date_tag, mean=feat_mean, std=feat_std, close_col_idx=close_col_idx)
+    lstm_model.save(
+        model, coin, date_tag, mean=feat_mean, std=feat_std, close_col_idx=close_col_idx
+    )
     logger.info("trainer_lstm_done", coin=coin)
 
 
@@ -234,10 +235,14 @@ def train_tft(feature_df: pd.DataFrame, coin: str, max_epochs: int = 30) -> None
     # Use shorter encoder length for training (168 hours = 7 days) to keep it fast.
     # Inference uses the full _ENCODER_LEN.
     train_encoder_len = 168
-    dataset = transformer_model._make_dataset(feature_df, coin, is_train=True, encoder_len=train_encoder_len)
+    dataset = transformer_model._make_dataset(
+        feature_df, coin, is_train=True, encoder_len=train_encoder_len
+    )
     val_cutoff = int(len(feature_df) * 0.9)
     val_df = feature_df.iloc[val_cutoff:].copy()
-    val_dataset = transformer_model._make_dataset(val_df, coin, is_train=False, encoder_len=train_encoder_len)
+    val_dataset = transformer_model._make_dataset(
+        val_df, coin, is_train=False, encoder_len=train_encoder_len
+    )
 
     train_loader = dataset.to_dataloader(train=True, batch_size=64, num_workers=0)
     val_loader = val_dataset.to_dataloader(train=False, batch_size=64, num_workers=0)

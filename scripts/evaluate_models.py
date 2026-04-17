@@ -52,10 +52,7 @@ def load_price_data(coin: str, days: int = 730) -> pd.DataFrame:
 
     with get_session() as session:
         rows = get_range(session, coin, start, end)
-        data = [
-            (r.timestamp, r.open, r.high, r.low, r.close, r.volume)
-            for r in rows
-        ]
+        data = [(r.timestamp, r.open, r.high, r.low, r.close, r.volume) for r in rows]
 
     if not data:
         return pd.DataFrame()
@@ -88,7 +85,12 @@ def _evaluate_xgboost(feature_df: pd.DataFrame, coin: str, horizon_hours: list[i
         if len(X) == 0:
             continue
 
-        preds = np.array([xgboost_model.predict(models, X[i])[f"target_{h}h" if h != 168 else "target_7d"] for i in range(len(X))])
+        preds = np.array(
+            [
+                xgboost_model.predict(models, X[i])[f"target_{h}h" if h != 168 else "target_7d"]
+                for i in range(len(X))
+            ]
+        )
 
         # current_prices for direction calc: price at prediction time
         current = feature_df["close"].values[:-h]
@@ -112,7 +114,12 @@ def _evaluate_lightgbm(feature_df: pd.DataFrame, coin: str, horizon_hours: list[
         if len(X) == 0:
             continue
 
-        preds = np.array([lightgbm_model.predict(models, X[i])[f"target_{h}h" if h != 168 else "target_7d"] for i in range(len(X))])
+        preds = np.array(
+            [
+                lightgbm_model.predict(models, X[i])[f"target_{h}h" if h != 168 else "target_7d"]
+                for i in range(len(X))
+            ]
+        )
         current = feature_df["close"].values[:-h]
 
         results[h] = (current, actuals, preds)
@@ -130,7 +137,9 @@ def _evaluate_lstm(feature_df: pd.DataFrame, coin: str, horizon_hours: list[int]
     n = len(feature_df)
 
     if n < seq_len + max(horizon_hours):
-        logger.warning("eval_lstm_insufficient_data", coin=coin, n=n, needed=seq_len + max(horizon_hours))
+        logger.warning(
+            "eval_lstm_insufficient_data", coin=coin, n=n, needed=seq_len + max(horizon_hours)
+        )
         return {}
 
     results = {}
@@ -314,12 +323,16 @@ def main() -> None:
         print(f"    Mean Dir. Accuracy: {r.mean_directional_accuracy:.4f} (target: >0.55)")
         print(f"    Mean Sharpe:        {r.mean_sharpe:.4f} (target: >1.0)")
         for h, m in sorted(r.horizons.items()):
-            print(f"      {h:3d}h: MAE={m.mae:.6f}  RMSE={m.rmse:.6f}  "
-                  f"DirAcc={m.directional_accuracy:.4f}  Sharpe={m.sharpe:.4f}  (n={m.n_samples})")
+            print(
+                f"      {h:3d}h: MAE={m.mae:.6f}  RMSE={m.rmse:.6f}  "
+                f"DirAcc={m.directional_accuracy:.4f}  Sharpe={m.sharpe:.4f}  (n={m.n_samples})"
+            )
 
     if best_report:
-        print(f"\n  Best model: {best_report.model.upper()} "
-              f"(dir. accuracy: {best_report.mean_directional_accuracy:.4f})")
+        print(
+            f"\n  Best model: {best_report.model.upper()} "
+            f"(dir. accuracy: {best_report.mean_directional_accuracy:.4f})"
+        )
 
     print("=" * 70)
 
