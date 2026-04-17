@@ -23,7 +23,7 @@ import structlog
 import numpy as np
 import pandas as pd
 
-from config.constants import COINS, PREDICTION_HORIZONS_HOURS, SEQUENCE_LENGTH
+from config.constants import COINS, PREDICTION_HORIZONS_HOURS
 from config.logging_config import setup_logging
 from storage.database import get_session
 from storage.price_repository import get_range

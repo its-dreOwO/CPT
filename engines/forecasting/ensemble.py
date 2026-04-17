@@ -190,7 +190,8 @@ def combine(
     Returns:
         PredictionResult with ensemble forecasts and confidence score.
     """
-    available = [k for k in model_outputs if k in _WEIGHTS]
+    base_weights = _WEIGHTS_BY_COIN.get(coin, DEFAULT_ENSEMBLE_WEIGHTS)
+    available = [k for k in model_outputs if k in base_weights]
     if not available:
         logger.error("ensemble_no_models", coin=coin)
         return PredictionResult(
