@@ -1,5 +1,5 @@
 # CPT — Task Tracker
-# Last Updated: 2026-04-12
+# Last Updated: 2026-04-17
 
 ---
 
@@ -82,15 +82,22 @@
 - [x] **E6** Implement `engines/forecasting/transformer_model.py` — TFT via pytorch-forecasting (TimeSeriesDataSet, multi-horizon attention)
 - [x] **E7** Implement `engines/forecasting/trainer.py` — training loop, checkpointing (trains XGB, LGBM, LSTM, TFT; TimesFM excluded as zero-shot)
 - [x] **E8** Implement `engines/forecasting/evaluator.py` — MAE, RMSE, directional accuracy, Sharpe ratio, EvaluationReport with pass/fail thresholds
-- [x] **E9** Implement `engines/forecasting/ensemble.py` — 5-model weighted combiner (TimesFM 30%, TFT 25%, LSTM 20%, XGB 15%, LGBM 10%), confidence from inter-model agreement
+- [x] **E9** Implement `engines/forecasting/ensemble.py` — per-coin weighted combiner; SOL: TimesFM 40%/TFT 25%/XGB 20%/LGBM 15%; DOGE: TimesFM 30%/TFT 25%/LSTM 20%/XGB 15%/LGBM 10%
 - [x] **E10** Implement `engines/forecasting/predictor.py` — inference entry point (runs all models, handles failures gracefully, returns PredictionResult)
-- [x] **E11** Train all models via Google Colab (notebooks/train_colab.ipynb) — 2026-04-14
-  - **SOL:** XGBoost (DirAcc=0.889, Sharpe=11.6), LightGBM (DirAcc=0.868, Sharpe=11.0), LSTM (needs retrain — see E12 note), TFT trained
-  - **DOGE:** XGBoost (DirAcc=0.874, Sharpe=11.7), LightGBM (DirAcc=0.855, Sharpe=10.98), LSTM (needs retrain), TFT trained
-- [~] **E12** Evaluate models — XGBoost + LightGBM pass for both coins — 2026-04-14
-  - **PASS:** SOL XGBoost, SOL LightGBM, DOGE XGBoost, DOGE LightGBM — all Dir.Acc >0.85, Sharpe >7.0
-  - **PENDING:** LSTM needs retrain with feature normalisation fix (trainer.py updated, re-run Colab lstm cells only)
-  - **NOTE:** TFT excluded from rolling eval (pytorch-forecasting needs future rows at inference time); works via predictor.py
+- [x] **E11** Train all models — 2026-04-14 (initial) / 2026-04-17 (LSTM retrain)
+  - **SOL:** XGBoost ✅, LightGBM ✅, LSTM excluded (see E12), TFT trained
+  - **DOGE:** XGBoost ✅, LightGBM ✅, LSTM ✅ (retrained 2026-04-17), TFT trained
+- [x] **E12** Evaluate all models — 2026-04-17
+  - **SOL:** XGBoost PASS (DirAcc=0.889, Sharpe=11.6), LightGBM PASS (DirAcc=0.868, Sharpe=11.0)
+  - **SOL LSTM:** FAIL after multiple retrains — seq_len mismatch fix + gradient clipping + log-return targets + early stopping all applied; best result dir_acc=0.54; excluded from SOL ensemble
+  - **DOGE:** XGBoost PASS (DirAcc=0.874, Sharpe=11.7), LightGBM PASS (DirAcc=0.855, Sharpe=10.98), LSTM PASS (DirAcc=0.592, Sharpe=3.28)
+  - **TFT:** excluded from rolling eval (pytorch-forecasting encoder constraint); works via predictor.py at inference time
+- [x] **E13** LSTM hardening — 2026-04-17
+  - Fixed seq_len mismatch (eval was using 1440h, training used 168h)
+  - Added gradient clipping (`clip_grad_norm_` max=1.0) to LSTM training loop
+  - Added 80/20 chronological train/val split with patience-10 early stopping
+  - Changed LSTM targets from absolute prices → log returns (scale-invariant across price regimes)
+  - `close_col_idx` now saved in checkpoint; `predict()` converts log returns back to absolute prices
 
 ---
 

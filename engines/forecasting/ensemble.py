@@ -21,12 +21,14 @@ import structlog
 import numpy as np
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from config.constants import DEFAULT_ENSEMBLE_WEIGHTS
+from config.constants import DEFAULT_ENSEMBLE_WEIGHTS, SOL_ENSEMBLE_WEIGHTS
 
 logger = structlog.get_logger(__name__)
 
-# Maps model key → weight. Must sum to 1.0.
-_WEIGHTS = DEFAULT_ENSEMBLE_WEIGHTS  # {"timesfm": 0.30, "tft": 0.25, ...}
+# Per-coin weight tables. Coins not listed here use DEFAULT_ENSEMBLE_WEIGHTS.
+_WEIGHTS_BY_COIN: dict[str, dict[str, float]] = {
+    "SOL": SOL_ENSEMBLE_WEIGHTS,
+}
 
 
 # ---------------------------------------------------------------------------
@@ -99,11 +101,12 @@ class PredictionResult:
 # ---------------------------------------------------------------------------
 
 
-def _redistribute_weights(available: list[str]) -> dict[str, float]:
+def _redistribute_weights(available: list[str], coin: str) -> dict[str, float]:
     """Return normalised weights for only the available models."""
     if not available:
         return {}
-    raw = {k: _WEIGHTS[k] for k in available if k in _WEIGHTS}
+    base = _WEIGHTS_BY_COIN.get(coin, DEFAULT_ENSEMBLE_WEIGHTS)
+    raw = {k: base[k] for k in available if k in base}
     total = sum(raw.values()) or 1.0
     return {k: v / total for k, v in raw.items()}
 
@@ -205,7 +208,7 @@ def combine(
             models_used=[],
         )
 
-    weights = _redistribute_weights(available)
+    weights = _redistribute_weights(available, coin)
 
     t24 = _weighted_mean({k: model_outputs[k]["target_24h"] for k in available}, weights)
     t72 = _weighted_mean({k: model_outputs[k]["target_72h"] for k in available}, weights)

@@ -55,11 +55,10 @@ a FastAPI server, streaming live price ticks and re-forecasting whenever the mar
 ┌─────────────────────────────────────────────────────────────────────┐
 │                 ML FORECASTING (on price move OR every 5 min)       │
 │                                                                     │
-│  TimesFM 2.5 (30%)  ← Google foundation model, zero-shot           │
-│  TFT        (25%)   ← Multi-horizon, uses all features              │
-│  LSTM       (20%)   ← Sequence memory on full feature set           │
-│  XGBoost    (15%)   ← Regime detection, interpretable               │
-│  LightGBM   (10%)   ← Tabular complement                            │
+│  Weights are per-coin (see config/constants.py):                   │
+│  DOGE: TimesFM(30%) TFT(25%) LSTM(20%) XGB(15%) LGBM(10%)         │
+│  SOL:  TimesFM(40%) TFT(25%) XGB(20%)  LGBM(15%)                  │
+│        [LSTM excluded from SOL — failed directional accuracy eval]  │
 │                      ↓                                              │
 │              engines/forecasting/ensemble.py                        │
 │   Output: { coin, direction, magnitude %, confidence 0–1,          │
@@ -204,7 +203,7 @@ them takes ~10 minutes total but prevents hours of debugging.
 | `transformer_model.py` | Temporal Fusion Transformer via `pytorch-forecasting`. Handles mixed static (coin type) and time-varying (all features) covariates. Built-in attention for variable importance | `ensemble.py`, `trainer.py` | `pytorch-forecasting`, `pytorch-lightning` | Best single model for multi-horizon forecasting. Slowest to train |
 | `xgboost_model.py` | XGBoost gradient boosted trees. Tabular features only (no sequence). Outputs bull/bear regime classification + price direction | `ensemble.py`, `trainer.py` | `xgboost`, `scikit-learn` | Provides interpretability via feature importance. Fast to retrain |
 | `lightgbm_model.py` | LightGBM: faster alternative to XGBoost, better on high-cardinality categorical features | `ensemble.py`, `trainer.py` | `lightgbm`, `scikit-learn` | Complement to XGBoost in the ensemble. Rarely needs separate tuning |
-| `ensemble.py` | Combines LSTM + TFT + XGBoost + LightGBM using learned weights (default: 25/35/20/20). Returns `PredictionResult` dataclass | `pipeline/prediction_pipeline.py` | all model files | **Never import `trainer.py` here.** Inference only. If a model fails to load, log and assign weight=0 to that model |
+| `ensemble.py` | Combines model outputs using per-coin weights from `config/constants.py`. SOL uses 4 models (no LSTM); DOGE uses all 5. Returns `PredictionResult` dataclass | `pipeline/prediction_pipeline.py` | all model files | **Never import `trainer.py` here.** Inference only. If a model fails to load, log and assign weight=0 to that model |
 | `trainer.py` | Full training loop: data loading, cross-validation, early stopping, model checkpointing with date-stamped filenames | `scripts/train_models.py` ONLY | `feature_builder.py`, all model files, `pytorch-lightning` | Never called by the prediction pipeline. Only imported by training scripts |
 | `evaluator.py` | Computes model performance: MAE, RMSE, directional accuracy %, Sharpe ratio on held-out test set | `scripts/evaluate_models.py` | all model files | Use rolling walk-forward validation, not a single train/test split |
 | `predictor.py` | Loads trained models, calls `feature_builder`, runs inference through all models, passes to `ensemble`. Entry point for generating a single prediction run | `pipeline/prediction_pipeline.py` | `feature_builder.py`, `ensemble.py` | Do not retrain or fine-tune here |

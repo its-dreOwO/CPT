@@ -126,7 +126,7 @@ def _evaluate_lstm(feature_df: pd.DataFrame, coin: str, horizon_hours: list[int]
     if model is None:
         return {}
 
-    seq_len = SEQUENCE_LENGTH * 24  # 60 days × 24 hours
+    seq_len = 168  # 7 days × 24 hours — matches training window in trainer.py
     n = len(feature_df)
 
     if n < seq_len + max(horizon_hours):
